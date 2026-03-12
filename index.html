@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#c8ff00">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LIVERJ">
+<title>Treino LIVERJ</title>
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --card: #16161f;
+  --card2: #1a1a26;
+  --border: #1e1e2e;
+  --accent: #c8ff00;
+  --accent2: #ff6b35;
+  --text: #e8e8f0;
+  --muted: #6b6b82;
+  --seg: #4a9eff;
+  --vol: #a855f7;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  overscroll-behavior: none;
+}
+
+/* ── Layout ── */
+#app { display:flex; flex-direction:column; height:100%; }
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: calc(var(--safe-top) + 14px) 20px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0; position: relative; z-index: 10;
+}
+.topbar-title { font-family:'Bebas Neue',sans-serif; font-size:26px; letter-spacing:.06em; }
+.topbar-title span { color: var(--accent); }
+
+.edit-btn {
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px; padding: 7px 14px;
+  color: var(--muted); font-family:'DM Sans',sans-serif; font-size:12px;
+  cursor: pointer; transition: all .2s; letter-spacing:.05em; text-transform:uppercase;
+}
+.edit-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(200,255,0,.08); }
+
+/* ── Tab nav ── */
+.tabnav {
+  display: flex; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; flex-shrink: 0;
+  scrollbar-width: none;
+}
+.tabnav::-webkit-scrollbar { display:none; }
+
+.tab {
+  flex: 0 0 auto; padding: 12px 18px;
+  font-size: 11px; text-transform: uppercase; letter-spacing:.12em;
+  color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .2s; white-space: nowrap;
+  background: none; border-top:none; border-left:none; border-right:none;
+  font-family:'DM Sans',sans-serif;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab.vol-tab.active { color: var(--vol); border-bottom-color: var(--vol); }
+
+/* ── Scroll area ── */
+.scroll-area {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 20px 16px calc(var(--safe-bot) + 20px);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Day header ── */
+.day-header {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin-bottom: 20px;
+}
+.day-num {
+  font-family:'Bebas Neue',sans-serif; font-size:56px; line-height:1;
+  color: var(--accent); opacity:.2; flex-shrink:0;
+}
+.day-meta { padding-top: 4px; }
+.day-name { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:.04em; }
+.day-badge {
+  display:inline-block; font-size:10px; text-transform:uppercase; letter-spacing:.12em;
+  padding: 3px 10px; border-radius:20px; margin-top:6px; font-weight:500;
+}
+.badge-seg { background:rgba(74,158,255,.12); color:var(--seg); border:1px solid rgba(74,158,255,.25); }
+.badge-ter { background:rgba(200,255,0,.08); color:var(--accent); border:1px solid rgba(200,255,0,.2); }
+.badge-qui { background:rgba(255,107,53,.1); color:var(--accent2); border:1px solid rgba(255,107,53,.25); }
+.badge-vol { background:rgba(168,85,247,.1); color:var(--vol); border:1px solid rgba(168,85,247,.25); }
+
+/* ── Alert ── */
+.alert {
+  border: 1px solid rgba(255,107,53,.3); background: rgba(255,107,53,.06);
+  border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;
+  display:flex; gap:12px;
+}
+.alert-icon { font-size:20px; flex-shrink:0; }
+.alert-title { font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--accent2); font-weight:500; margin-bottom:4px; }
+.alert-text { font-size:12px; color:var(--muted); line-height:1.65; }
+
+/* ── Exercise card ── */
+.ex-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; margin-bottom: 10px; overflow: hidden;
+  transition: border-color .2s;
+}
+.ex-card.editing { border-color: rgba(200,255,0,.3); }
+
+.ex-main {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  cursor: pointer; user-select: none;
+}
+.ex-icon { font-size:20px; flex-shrink:0; width:32px; text-align:center; }
+.ex-info { flex:1; min-width:0; }
+.ex-name-text { font-size:14px; font-weight:400; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ex-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+.ex-badge-wrap { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
+.ex-sets-badge {
+  font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); line-height:1;
+}
+.ex-sets-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; }
+.ex-reps-badge { font-size:11px; color:var(--muted); text-align:right; }
+
+/* Edit panel */
+.ex-edit-panel {
+  display:none; padding: 0 16px 14px; border-top: 1px solid var(--border);
+  background: var(--card2);
+}
+.ex-edit-panel.open { display:block; }
+
+.field-row { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+.field-group { flex:1; min-width:100px; }
+.field-label { font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin-bottom:6px; }
+.field-input {
+  width:100%; background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; color: var(--text);
+  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:300;
+  outline:none; transition: border-color .2s;
+}
+.field-input:focus { border-color: var(--accent); }
+.field-input.name-input { font-size:14px; }
+
+.note-input {
+  width:100%; background: var(--card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 12px; color: var(--muted);
+  font-family:'DM Sans',sans-serif; font-size:12px; font-weight:300;
+  outline:none; transition: border-color .2s; resize:none; min-height:56px;
+  margin-top:10px;
+}
+.note-input:focus { border-color: rgba(200,255,0,.4); color: var(--text); }
+
+/* Carga row */
+.load-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 10px; padding: 10px 12px;
+  background: rgba(200,255,0,.04); border-radius:8px;
+  border: 1px solid rgba(200,255,0,.1);
+}
+.load-label { font-size:11px; color:var(--accent); flex:1; }
+.load-input {
+  width:90px; background: var(--card); border: 1px solid rgba(200,255,0,.2);
+  border-radius:6px; padding:7px 10px; color: var(--accent);
+  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+  outline:none; text-align:center;
+}
+.load-input:focus { border-color: var(--accent); }
+
+/* ── Progression tab ── */
+.prog-header { margin-bottom:20px; }
+.prog-title { font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:.04em; }
+.prog-title span { color:var(--accent); }
+.prog-sub { font-size:13px; color:var(--muted); margin-top:4px; }
+
+.phase-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px 20px; margin-bottom: 12px;
+  transition: border-color .2s;
+}
+.phase-card.editing { border-color: rgba(200,255,0,.3); }
+
+.phase-top { display:flex; align-items:flex-start; gap:14px; cursor:pointer; user-select:none; }
+.phase-num { font-family:'Bebas Neue',sans-serif; font-size:44px; color:var(--accent); opacity:.25; line-height:1; flex-shrink:0; }
+.phase-info { flex:1; }
+.phase-name { font-size:16px; font-weight:500; }
+.phase-weeks { font-size:11px; color:var(--accent2); text-transform:uppercase; letter-spacing:.1em; margin-top:2px; }
+.phase-desc { font-size:12px; color:var(--muted); margin-top:6px; line-height:1.65; }
+
+.phase-carga-section { margin-top:14px; border-top:1px solid var(--border); padding-top:14px; display:none; }
+.phase-carga-section.open { display:block; }
+.carga-title { font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin-bottom:10px; }
+
+.carga-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.carga-item {
+  background: var(--card2); border-radius:8px; padding:10px 12px;
+  border: 1px solid var(--border);
+}
+.carga-item-label { font-size:11px; color:var(--muted); margin-bottom:6px; }
+.carga-item-input {
+  width:100%; background:transparent; border:none; border-bottom:1px solid var(--border);
+  color:var(--accent); font-family:'DM Sans',sans-serif; font-size:14px; font-weight:500;
+  padding: 2px 0; outline:none;
+}
+.carga-item-input:focus { border-bottom-color: var(--accent); }
+
+/* ── Vol tab ── */
+.vol-header { margin-bottom:24px; }
+.vol-title { font-family:'Bebas Neue',sans-serif; font-size:36px; letter-spacing:.04em; }
+.vol-title span { color:var(--vol); }
+
+.vol-card {
+  background: var(--card); border:1px solid var(--border); border-radius:14px;
+  overflow:hidden; margin-bottom:12px;
+}
+.vol-card-header {
+  padding:14px 18px; display:flex; align-items:center; gap:12px;
+  background: rgba(168,85,247,.04);
+  border-bottom: 1px solid rgba(168,85,247,.12);
+}
+.vol-day { font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--vol); }
+.vol-type { font-size:13px; font-weight:400; }
+.vol-time { font-size:11px; color:var(--muted); }
+.vol-body { padding:14px 18px; }
+.vol-row { display:flex; gap:8px; align-items:center; margin-bottom:6px; }
+.vol-dot { width:6px; height:6px; border-radius:50%; background:var(--vol); opacity:.5; flex-shrink:0; }
+.vol-info { font-size:12px; color:var(--muted); }
+
+/* ── Tips tab ── */
+.tip-card {
+  background: var(--card); border:1px solid var(--border); border-radius:14px;
+  padding:18px 20px; margin-bottom:10px;
+}
+.tip-icon { font-size:28px; margin-bottom:10px; }
+.tip-title { font-size:14px; font-weight:500; margin-bottom:6px; }
+.tip-text { font-size:12px; color:var(--muted); line-height:1.7; }
+
+/* ── Save toast ── */
+.toast {
+  position:fixed; bottom:calc(var(--safe-bot) + 20px); left:50%; transform:translateX(-50%) translateY(80px);
+  background:var(--accent); color:var(--bg); font-size:12px; font-weight:500;
+  padding:10px 22px; border-radius:30px; letter-spacing:.06em; text-transform:uppercase;
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1); z-index:100;
+  white-space:nowrap;
+}
+.toast.show { transform:translateX(-50%) translateY(0); }
+
+/* scrollbar */
+.scroll-area::-webkit-scrollbar { width:3px; }
+.scroll-area::-webkit-scrollbar-track { background:transparent; }
+.scroll-area::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-title">TREINO <span>LIVERJ</span></div>
+    <button class="edit-btn" id="editBtn" onclick="toggleEdit()">Editar</button>
+  </div>
+
+  <div class="tabnav" id="tabnav"></div>
+
+  <div class="scroll-area" id="scrollArea"></div>
+</div>
+
+<div class="toast" id="toast">💾 Salvo!</div>
+
+<script>
+// ─── Data ───────────────────────────────────────────────────────────────────
+const DEFAULT = {
+  days: [
+    {
+      id: 'seg', label: 'Segunda', badge: 'badge-seg', focus: 'Inferior A — Quadríceps & Core', num: '01',
+      alert: { icon: '⚠️', title: 'Jumper\'s Knee — Protocolo de proteção', text: 'Evite agachamento profundo abaixo de 90° nas primeiras 4 semanas. Nenhum exercício deve causar dor no tendão patelar. Priorize o Leg Press no lugar do agachamento livre.' },
+      exercises: [
+        { id:'s1', icon:'🚴', name:'Aquecimento — Bike ou esteira', note:'Leve, só pra ativar', sets:'8', reps:'min', load:'' },
+        { id:'s2', icon:'🦵', name:'Leg Press 45°', note:'Descida lenta (3s), joelho até 90°', sets:'4', reps:'10–12 reps', load:'' },
+        { id:'s3', icon:'🏋️', name:'Agachamento Goblet', note:'Haltere no peito, postura vertical', sets:'3', reps:'10 reps', load:'' },
+        { id:'s4', icon:'💪', name:'Cadeira Extensora', note:'Carga leve — fortalece quad sem estresse no tendão', sets:'3', reps:'12–15 reps', load:'' },
+        { id:'s5', icon:'🦶', name:'Panturrilha em pé (Gêmeos)', note:'Amplitude total, importante pro salto', sets:'4', reps:'15 reps', load:'' },
+        { id:'s6', icon:'🧘', name:'Prancha frontal', note:'Core estabilizador — base pra potência de ataque', sets:'3', reps:'30–45 seg', load:'' },
+        { id:'s7', icon:'🔄', name:'Dead Bug', note:'Controle lombar, essencial pra atletas de salto', sets:'3', reps:'8 reps/lado', load:'' },
+      ]
+    },
+    {
+      id: 'ter', label: 'Terça', badge: 'badge-ter', focus: 'Superior — Ombro, Costas & Peito', num: '02',
+      exercises: [
+        { id:'t1', icon:'🔁', name:'Band pull-aparts (Aquecimento)', note:'Elástico, foco no manguito rotador', sets:'2', reps:'15 reps', load:'' },
+        { id:'t2', icon:'⬇️', name:'Puxada Frontal (Lat Pulldown)', note:'Pegada larga, puxar até o queixo', sets:'4', reps:'10–12 reps', load:'' },
+        { id:'t3', icon:'🔙', name:'Remada Curvada com Barra', note:'Núcleo ativado, escápula trabalhando', sets:'3', reps:'10 reps', load:'' },
+        { id:'t4', icon:'⬆️', name:'Desenvolvimento com Halteres', note:'Amplitude controlada, não travar no topo', sets:'3', reps:'10–12 reps', load:'' },
+        { id:'t5', icon:'🦅', name:'Elevação Lateral com Halteres', note:'Carga leve, controle total — saúde do ombro', sets:'3', reps:'15 reps', load:'' },
+        { id:'t6', icon:'💪', name:'Rosca Alternada', note:'Supinação no topo', sets:'3', reps:'10 reps/lado', load:'' },
+        { id:'t7', icon:'🔽', name:'Tríceps Pulley', note:'Cotovelo fixo ao lado do tronco', sets:'3', reps:'12 reps', load:'' },
+      ]
+    },
+    {
+      id: 'qui', label: 'Quinta', badge: 'badge-qui', focus: 'Inferior B — Posterior & Protocolo Joelho', num: '03',
+      alert: { icon: '⭐', title: 'Wall Sit Isométrico — Protocolo terapêutico', text: '5 séries de 45 segundos com 2 min de descanso. Deve ser desconfortável mas NUNCA doloroso. Este exercício é o core do tratamento para jumper\'s knee.' },
+      exercises: [
+        { id:'q1', icon:'🔄', name:'Hip circles + Monster Walk', note:'Elástico no tornozelo pro monster walk', sets:'2', reps:'10 cada', load:'' },
+        { id:'q2', icon:'🏋️', name:'Stiff com Halteres', note:'Descida controlada, sentir isquiotibiais — posterior = joelho protegido', sets:'4', reps:'10–12 reps', load:'' },
+        { id:'q3', icon:'🚶', name:'Passada com Halteres (Lunge)', note:'Passo largo, joelho traseiro quase no chão', sets:'3', reps:'10 reps/lado', load:'' },
+        { id:'q4', icon:'🦵', name:'Leg Curl (Flexora) — Excêntrico', note:'Desça em 4 segundos — protocolo patellar', sets:'4', reps:'10 reps (4s exc)', load:'' },
+        { id:'q5', icon:'⭐', name:'Isometric Wall Sit', note:'90° no joelho, costas na parede — terapêutico', sets:'5', reps:'45 seg', load:'' },
+        { id:'q6', icon:'🍑', name:'Glúteo no Cabo (Kickback)', note:'Estabilização pélvica = menos sobrecarga joelho', sets:'3', reps:'12 reps/lado', load:'' },
+        { id:'q7', icon:'↔️', name:'Prancha Lateral', note:'Core anti-lateral — melhora equilíbrio na recepção', sets:'3', reps:'30 seg/lado', load:'' },
+      ]
+    }
+  ],
+  progression: {
+    phases: [
+      { id:'p1', num:'01', name:'Adaptação', weeks:'Semanas 1–3', desc:'Cargas baixas, foco em técnica e ativar musculatura. Prioridade: não inflamar o joelho.',
+        loads: [ {label:'Leg Press', val:''}, {label:'Stiff', val:''}, {label:'Puxada', val:''}, {label:'Desenvolvimento', val:''} ] },
+      { id:'p2', num:'02', name:'Construção', weeks:'Semanas 4–7', desc:'Adicionar carga progressiva (+5–10%/semana). Introduzir agachamento livre se joelho estiver bem.',
+        loads: [ {label:'Leg Press', val:''}, {label:'Stiff', val:''}, {label:'Puxada', val:''}, {label:'Desenvolvimento', val:''} ] },
+      { id:'p3', num:'03', name:'Performance', weeks:'Semana 8+', desc:'Trabalho de potência: saltos controlados, agachamento jump, potência de ataque.',
+        loads: [ {label:'Leg Press', val:''}, {label:'Stiff', val:''}, {label:'Puxada', val:''}, {label:'Desenvolvimento', val:''} ] },
+    ]
+  }
+};
+
+// ─── State ───────────────────────────────────────────────────────────────────
+let state = JSON.parse(JSON.stringify(DEFAULT));
+let editMode = false;
+let activeTab = 'seg';
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('liverj-state');
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('liverj-state', JSON.stringify(state));
+    showToast();
+  } catch(e) {}
+}
+
+function showToast() {
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+const TABS = [
+  { id:'seg', label:'Segunda', cls:'' },
+  { id:'ter', label:'Terça', cls:'' },
+  { id:'qui', label:'Quinta', cls:'' },
+  { id:'prog', label:'Progressão', cls:'' },
+  { id:'vol', label:'Vôlei', cls:'vol-tab' },
+  { id:'tips', label:'Dicas', cls:'' },
+];
+
+function renderTabs() {
+  const nav = document.getElementById('tabnav');
+  nav.innerHTML = TABS.map(t => `
+    <button class="tab ${t.cls} ${activeTab===t.id?'active':''}" onclick="setTab('${t.id}')">${t.label}</button>
+  `).join('');
+}
+
+function setTab(id) {
+  activeTab = id;
+  renderTabs();
+  renderContent();
+  document.getElementById('scrollArea').scrollTop = 0;
+}
+
+// ─── Edit mode ────────────────────────────────────────────────────────────────
+function toggleEdit() {
+  editMode = !editMode;
+  document.getElementById('editBtn').classList.toggle('active', editMode);
+  document.getElementById('editBtn').textContent = editMode ? 'Concluído' : 'Editar';
+  renderContent();
+}
+
+// ─── Exercise card ────────────────────────────────────────────────────────────
+function exCard(ex, dayId) {
+  const panelId = `panel-${ex.id}`;
+  return `
+  <div class="ex-card ${editMode?'editing':''}" id="card-${ex.id}">
+    <div class="ex-main" onclick="${editMode ? `togglePanel('${panelId}')` : ''}">
+      <div class="ex-icon">${ex.icon||'💪'}</div>
+      <div class="ex-info">
+        <div class="ex-name-text">${esc(ex.name)}</div>
+        <div class="ex-sub">${esc(ex.note)}${ex.load ? ` · <span style="color:var(--accent)">${esc(ex.load)}</span>` : ''}</div>
+      </div>
+      <div class="ex-badge-wrap">
+        <div class="ex-sets-badge">${esc(ex.sets)}</div>
+        <div class="ex-sets-label">séries</div>
+        <div class="ex-reps-badge">${esc(ex.reps)}</div>
+      </div>
+    </div>
+    ${editMode ? `
+    <div class="ex-edit-panel" id="${panelId}">
+      <div class="field-row">
+        <div class="field-group" style="flex:2; min-width:160px">
+          <div class="field-label">Nome do exercício</div>
+          <input class="field-input name-input" value="${esc(ex.name)}" oninput="updateEx('${dayId}','${ex.id}','name',this.value)" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <div class="field-label">Séries</div>
+          <input class="field-input" value="${esc(ex.sets)}" oninput="updateEx('${dayId}','${ex.id}','sets',this.value)" />
+        </div>
+        <div class="field-group">
+          <div class="field-label">Repetições / Tempo</div>
+          <input class="field-input" value="${esc(ex.reps)}" oninput="updateEx('${dayId}','${ex.id}','reps',this.value)" />
+        </div>
+      </div>
+      <div class="load-row">
+        <div class="load-label">⚖️ Carga atual</div>
+        <input class="load-input" placeholder="ex: 60kg" value="${esc(ex.load)}" oninput="updateEx('${dayId}','${ex.id}','load',this.value)" />
+      </div>
+      <textarea class="note-input" placeholder="Observação / técnica..." oninput="updateEx('${dayId}','${ex.id}','note',this.value)">${esc(ex.note)}</textarea>
+    </div>
+    ` : ''}
+  </div>`;
+}
+
+function togglePanel(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('open');
+}
+
+function updateEx(dayId, exId, field, val) {
+  const day = state.days.find(d => d.id === dayId);
+  if (!day) return;
+  const ex = day.exercises.find(e => e.id === exId);
+  if (ex) { ex[field] = val; saveState(); }
+  // re-render badge only
+  const card = document.getElementById(`card-${exId}`);
+  if (card) {
+    const nameEl = card.querySelector('.ex-name-text');
+    const subEl = card.querySelector('.ex-sub');
+    const setsEl = card.querySelector('.ex-sets-badge');
+    const repsEl = card.querySelector('.ex-reps-badge');
+    if (nameEl) nameEl.textContent = ex.name;
+    if (subEl) subEl.innerHTML = esc(ex.note) + (ex.load ? ` · <span style="color:var(--accent)">${esc(ex.load)}</span>` : '');
+    if (setsEl) setsEl.textContent = ex.sets;
+    if (repsEl) repsEl.textContent = ex.reps;
+  }
+}
+
+// ─── Render content ───────────────────────────────────────────────────────────
+function renderContent() {
+  const area = document.getElementById('scrollArea');
+  
+  if (activeTab === 'prog') { area.innerHTML = renderProg(); return; }
+  if (activeTab === 'vol')  { area.innerHTML = renderVol(); return; }
+  if (activeTab === 'tips') { area.innerHTML = renderTips(); return; }
+  
+  const day = state.days.find(d => d.id === activeTab);
+  if (!day) return;
+  
+  let html = `
+    <div class="day-header">
+      <div class="day-num">${day.num}</div>
+      <div class="day-meta">
+        <div class="day-name">${day.label}-feira</div>
+        <span class="day-badge ${day.badge}">${day.focus}</span>
+      </div>
+    </div>`;
+  
+  if (day.alert) {
+    html += `<div class="alert">
+      <div class="alert-icon">${day.alert.icon}</div>
+      <div>
+        <div class="alert-title">${day.alert.title}</div>
+        <div class="alert-text">${day.alert.text}</div>
+      </div>
+    </div>`;
+  }
+  
+  html += day.exercises.map(ex => exCard(ex, day.id)).join('');
+  area.innerHTML = html;
+}
+
+function renderProg() {
+  const { phases } = state.progression;
+  let html = `<div class="prog-header">
+    <div class="prog-title">PLANO DE <span>PROGRESSÃO</span></div>
+    <div class="prog-sub">Toque numa fase para ${editMode ? 'editar e ' : ''}registrar cargas</div>
+  </div>`;
+  
+  phases.forEach(p => {
+    const sectionId = `phase-section-${p.id}`;
+    html += `
+    <div class="phase-card ${editMode?'editing':''}">
+      <div class="phase-top" onclick="togglePanel('${sectionId}')">
+        <div class="phase-num">${p.num}</div>
+        <div class="phase-info">
+          <div class="phase-name">${esc(p.name)}</div>
+          <div class="phase-weeks">${esc(p.weeks)}</div>
+          <div class="phase-desc">${esc(p.desc)}</div>
+        </div>
+      </div>
+      <div class="phase-carga-section" id="${sectionId}">
+        <div class="carga-title">Cargas registradas</div>
+        <div class="carga-grid">
+          ${p.loads.map((l, li) => `
+          <div class="carga-item">
+            <div class="carga-item-label">${esc(l.label)}</div>
+            <input class="carga-item-input" placeholder="—" value="${esc(l.val)}"
+              oninput="updateLoad('${p.id}',${li},this.value)" />
+          </div>`).join('')}
+        </div>
+        ${editMode ? `
+        <div style="margin-top:12px">
+          <div class="field-label" style="margin-bottom:6px">Descrição da fase</div>
+          <textarea class="note-input" style="margin-top:0" oninput="updatePhase('${p.id}','desc',this.value)">${esc(p.desc)}</textarea>
+        </div>` : ''}
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function updateLoad(phaseId, idx, val) {
+  const p = state.progression.phases.find(x => x.id === phaseId);
+  if (p && p.loads[idx]) { p.loads[idx].val = val; saveState(); }
+}
+
+function updatePhase(phaseId, field, val) {
+  const p = state.progression.phases.find(x => x.id === phaseId);
+  if (p) { p[field] = val; saveState(); }
+}
+
+function renderVol() {
+  return `
+  <div class="vol-header">
+    <div class="vol-title">DIAS DE <span>VÔLEI</span></div>
+  </div>
+  <div class="vol-card">
+    <div class="vol-card-header">
+      <div class="vol-day">QUA</div>
+      <div><div class="vol-type">Treino do time</div><div class="vol-time">1h30 · Intensidade moderada</div></div>
+    </div>
+    <div class="vol-body">
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Descanso relativo: vem após Terça de academia</div></div>
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Hidratação caprichada — você treina no dia seguinte</div></div>
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Aproveite pra trabalhar aspectos técnicos com energia</div></div>
+    </div>
+  </div>
+  <div class="vol-card">
+    <div class="vol-card-header">
+      <div class="vol-day">SEX</div>
+      <div><div class="vol-type">Pelada</div><div class="vol-time">20h–22h · 2 horas</div></div>
+    </div>
+    <div class="vol-body">
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Dia após Quinta de academia — pernas podem estar pesadas</div></div>
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Coma bem antes (carboidratos + proteína, 2h antes)</div></div>
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Faça um aquecimento leve antes de começar</div></div>
+    </div>
+  </div>
+  <div class="vol-card">
+    <div class="vol-card-header">
+      <div class="vol-day">SÁB</div>
+      <div><div class="vol-type">Treino LIVERJ</div><div class="vol-time">Alta intensidade</div></div>
+    </div>
+    <div class="vol-body">
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Sessão mais exigente da semana — prioridade máxima</div></div>
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Se chegar pesado na Segunda seguinte, reduza a academia</div></div>
+      <div class="vol-row"><div class="vol-dot"></div><div class="vol-info">Recuperação ativa pós-treino: alongamento + proteína</div></div>
+    </div>
+  </div>`;
+}
+
+function renderTips() {
+  const tips = [
+    { icon:'🍽️', title:'Nutrição pré/pós treino', text:'Coma carboidrato + proteína 1h antes da academia. Pós-treino: proteína em até 30 min. Com esse volume semanal, comer bem é tão importante quanto treinar.' },
+    { icon:'😴', title:'Sono e recuperação', text:'Com academia 3x + vôlei 3x, seu corpo está sempre em demanda. Mínimo 7–8h de sono. O domingo de descanso total é mandatório.' },
+    { icon:'🩹', title:'Monitoramento do joelho', text:'Se a dor no tendão patelar piorar após qualquer sessão, reduza volume e carga. O isometric wall sit deve ser desconfortável mas nunca doloroso.' },
+    { icon:'📈', title:'Progressão inteligente', text:'Não tente progredir tudo na mesma semana. Foque em 1–2 exercícios. Técnica perfeita vale mais do que carga alta com forma ruim.' },
+    { icon:'🔥', title:'Aquecimento não é opcional', text:'Com treino intenso no sábado, suas articulações chegam na academia sobrecarregadas. 8–10 min de aquecimento leve são inegociáveis.' },
+    { icon:'🏐', title:'Academia serve o vôlei', text:'Se o sábado foi muito pesado, reduza o volume na Segunda. Performance no time em primeiro lugar — a academia é um suporte.' },
+  ];
+  return tips.map(t => `
+    <div class="tip-card">
+      <div class="tip-icon">${t.icon}</div>
+      <div class="tip-title">${t.title}</div>
+      <div class="tip-text">${t.text}</div>
+    </div>
+  `).join('');
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+
+loadState();
+renderTabs();
+renderContent();
+</script>
+</body>
+</html>
