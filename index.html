@@ -236,6 +236,81 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 .carga-item-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--accent);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;padding:2px 0;outline:none;}
 .carga-item-input:focus{border-bottom-color:var(--accent);}
 
+/* Chart */
+.chart-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 16px;margin-bottom:20px;}
+.chart-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+.chart-section-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;}
+.chart-section-title span{color:var(--accent);}
+.ex-dropdown{
+  background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;
+  outline:none;cursor:pointer;max-width:180px;
+}
+.ex-dropdown:focus{border-color:var(--accent);}
+.chart-wrap{position:relative;width:100%;height:180px;}
+.chart-canvas{width:100%;height:100%;}
+.chart-empty{
+  display:flex;align-items:center;justify-content:center;height:140px;
+  color:var(--muted);font-size:13px;flex-direction:column;gap:8px;
+}
+.chart-log-btn{
+  margin-top:12px;width:100%;padding:11px;border-radius:10px;
+  border:1px dashed rgba(var(--accent-rgb),.3);background:rgba(var(--accent-rgb),.04);
+  color:var(--accent);font-family:'DM Sans',sans-serif;font-size:12px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .2s;
+}
+.chart-log-btn:active{background:rgba(var(--accent-rgb),.12);}
+.chart-legend{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.chart-point-label{font-size:10px;color:var(--muted);}
+
+/* Log modal */
+.log-history{margin-top:14px;max-height:160px;overflow-y:auto;}
+.log-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.log-row:last-child{border-bottom:none;}
+.log-date{font-size:11px;color:var(--muted);}
+.log-val{font-size:14px;font-weight:500;color:var(--accent);}
+.log-del{background:none;border:none;color:rgba(255,80,80,.5);cursor:pointer;font-size:14px;padding:2px 6px;}
+.log-del:active{color:#ff5050;}
+
+/* Jump PBs */
+.jump-section{margin-bottom:20px;}
+.jump-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;margin-bottom:12px;}
+.jump-title span{color:var(--vol);}
+.jump-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.jump-card{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:18px 16px;text-align:center;position:relative;overflow:hidden;
+}
+.jump-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 120%, rgba(168,85,247,.12), transparent 70%);
+  pointer-events:none;
+}
+.jump-card-icon{font-size:28px;margin-bottom:8px;}
+.jump-card-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:10px;}
+.jump-pb-val{font-family:'Bebas Neue',sans-serif;font-size:40px;color:var(--vol);line-height:1;}
+.jump-pb-unit{font-size:11px;color:var(--muted);}
+.jump-pb-date{font-size:10px;color:var(--muted);margin-top:4px;opacity:.7;}
+.jump-history-btn{
+  width:100%;margin-top:10px;padding:8px;border-radius:8px;
+  border:1px solid rgba(168,85,247,.25);background:rgba(168,85,247,.06);
+  color:var(--vol);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;
+}
+.jump-pb-history{margin-top:10px;display:none;}
+.jump-pb-history.open{display:block;}
+.jump-log-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.jump-log-row:last-child{border-bottom:none;}
+.jump-log-val{color:var(--vol);font-weight:500;}
+.jump-log-date{color:var(--muted);}
+.jump-log-del{background:none;border:none;color:rgba(255,80,80,.4);cursor:pointer;font-size:13px;}
+.new-pb-badge{
+  position:absolute;top:10px;right:10px;
+  background:var(--accent);color:var(--bg);
+  font-size:8px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;
+  padding:2px 6px;border-radius:10px;
+}
+
 /* Vol */
 .vol-header{margin-bottom:24px;}
 .vol-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:.04em;}
@@ -342,6 +417,42 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
   <div class="scroll-area" id="scrollArea"></div>
 </div>
 
+<!-- Log carga modal -->
+<div class="modal-overlay" id="logModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">REGISTRAR <span>CARGA</span></div>
+    <div class="modal-field">
+      <div class="modal-label">Carga (kg)</div>
+      <input class="modal-input" id="logValInput" type="number" inputmode="decimal" placeholder="ex: 60" />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Data</div>
+      <input class="modal-input" id="logDateInput" type="date" />
+    </div>
+    <button class="modal-confirm-btn" onclick="confirmLog()">SALVAR</button>
+    <button class="modal-cancel-btn" onclick="closeModal('logModal')">Cancelar</button>
+  </div>
+</div>
+
+<!-- Jump PB modal -->
+<div class="modal-overlay" id="jumpModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="jumpModalTitle">SALTO</div>
+    <div class="modal-field">
+      <div class="modal-label">Altura (cm)</div>
+      <input class="modal-input" id="jumpValInput" type="number" inputmode="decimal" placeholder="ex: 75" />
+    </div>
+    <div class="modal-field">
+      <div class="modal-label">Data</div>
+      <input class="modal-input" id="jumpDateInput" type="date" />
+    </div>
+    <button class="modal-confirm-btn" style="background:var(--vol);color:#fff" onclick="confirmJump()">SALVAR PB</button>
+    <button class="modal-cancel-btn" onclick="closeModal('jumpModal')">Cancelar</button>
+  </div>
+</div>
+
 <!-- Add exercise modal -->
 <div class="modal-overlay" id="addModal">
   <div class="modal">
@@ -396,6 +507,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;fon
 // ─── Default data ─────────────────────────────────────────────────────────────
 const DEFAULT = {
   accentColor: '#c8ff00',
+  loadHistory: {},
+  jumpPBs: { approach: [], standing: [] },
   days: [
     {
       id:'seg',label:'Segunda',badge:'badge-seg',focus:'Inferior A — Quadríceps & Core',num:'01',
@@ -549,6 +662,7 @@ function setTab(id) {
   activeTab=id; renderTabs(); renderContent();
   document.getElementById('scrollArea').scrollTop=0;
   if(id==='cfg') setTimeout(initWheel,50);
+  if(id==='prog') setTimeout(drawChart,80);
 }
 
 function toggleEdit() {
@@ -698,7 +812,7 @@ function confirmAddEx() {
 // ─── Render ───────────────────────────────────────────────────────────────────
 function renderContent() {
   const area=document.getElementById('scrollArea');
-  if(activeTab==='prog'){area.innerHTML=renderProg();return;}
+  if(activeTab==='prog'){area.innerHTML=renderProg();setTimeout(drawChart,80);return;}
   if(activeTab==='vol'){area.innerHTML=renderVol();return;}
   if(activeTab==='tips'){area.innerHTML=renderTips();return;}
   if(activeTab==='cfg'){area.innerHTML=renderCfg();setTimeout(initWheel,50);return;}
@@ -720,12 +834,107 @@ function renderContent() {
   area.innerHTML=html;
 }
 
+function getAllExercises() {
+  const all = [];
+  state.days.forEach(d => d.exercises.forEach(ex => {
+    all.push({ id: ex.id, name: ex.name, icon: ex.icon || '💪' });
+  }));
+  return all;
+}
+
 function renderProg() {
-  const {phases}=state.progression;
-  let html=`<div class="prog-header">
+  const {phases} = state.progression;
+  const allEx = getAllExercises();
+  const selectedEx = state.chartSelectedEx || (allEx[0] ? allEx[0].id : null);
+  const history = (state.loadHistory && selectedEx) ? (state.loadHistory[selectedEx] || []) : [];
+  const jumpApp = state.jumpPBs?.approach || [];
+  const jumpSta = state.jumpPBs?.standing || [];
+  const pbApp = jumpApp.length ? Math.max(...jumpApp.map(j=>j.val)) : null;
+  const pbSta = jumpSta.length ? Math.max(...jumpSta.map(j=>j.val)) : null;
+  const lastApp = jumpApp.length ? jumpApp[jumpApp.length-1] : null;
+  const lastSta = jumpSta.length ? jumpSta[jumpSta.length-1] : null;
+  const isNewPbApp = lastApp && lastApp.val === pbApp && jumpApp.length > 1;
+  const isNewPbSta = lastSta && lastSta.val === pbSta && jumpSta.length > 1;
+
+  let html = `<div class="prog-header">
     <div class="prog-title">PLANO DE <span>PROGRESSÃO</span></div>
-    <div class="prog-sub">Toque numa fase para registrar cargas</div>
+    <div class="prog-sub">Gráfico de carga e PBs de salto</div>
   </div>`;
+
+  // ── Jump PBs ──
+  html += `<div class="jump-section">
+    <div class="jump-title">PB DE <span>SALTO</span></div>
+    <div class="jump-cards">
+      <div class="jump-card">
+        ${isNewPbApp ? '<div class="new-pb-badge">🏆 Novo PB!</div>' : ''}
+        <div class="jump-card-icon">🏃</div>
+        <div class="jump-card-label">Com passada</div>
+        <div class="jump-pb-val">${pbApp !== null ? pbApp : '—'}</div>
+        <div class="jump-pb-unit">cm</div>
+        <div class="jump-pb-date">${pbApp !== null ? 'melhor registro' : 'sem registros'}</div>
+        <button class="jump-history-btn" onclick="openJumpModal('approach')">＋ Registrar</button>
+        <div class="jump-pb-history" id="hist-approach">
+          ${jumpApp.slice().reverse().map((j,i)=>`
+          <div class="jump-log-row">
+            <span class="jump-log-val">${j.val} cm</span>
+            <span class="jump-log-date">${j.date}</span>
+            <button class="jump-log-del" onclick="delJump('approach',${jumpApp.length-1-i})">✕</button>
+          </div>`).join('') || '<div style="font-size:12px;color:var(--muted);padding:8px 0">Nenhum registro ainda</div>'}
+        </div>
+        <button class="jump-history-btn" style="margin-top:6px;opacity:.6" onclick="toggleJumpHist('approach')">Histórico</button>
+      </div>
+      <div class="jump-card">
+        ${isNewPbSta ? '<div class="new-pb-badge">🏆 Novo PB!</div>' : ''}
+        <div class="jump-card-icon">🧍</div>
+        <div class="jump-card-label">Parado</div>
+        <div class="jump-pb-val">${pbSta !== null ? pbSta : '—'}</div>
+        <div class="jump-pb-unit">cm</div>
+        <div class="jump-pb-date">${pbSta !== null ? 'melhor registro' : 'sem registros'}</div>
+        <button class="jump-history-btn" onclick="openJumpModal('standing')">＋ Registrar</button>
+        <div class="jump-pb-history" id="hist-standing">
+          ${jumpSta.slice().reverse().map((j,i)=>`
+          <div class="jump-log-row">
+            <span class="jump-log-val">${j.val} cm</span>
+            <span class="jump-log-date">${j.date}</span>
+            <button class="jump-log-del" onclick="delJump('standing',${jumpSta.length-1-i})">✕</button>
+          </div>`).join('') || '<div style="font-size:12px;color:var(--muted);padding:8px 0">Nenhum registro ainda</div>'}
+        </div>
+        <button class="jump-history-btn" style="margin-top:6px;opacity:.6" onclick="toggleJumpHist('standing')">Histórico</button>
+      </div>
+    </div>
+  </div>`;
+
+  // ── Load chart ──
+  html += `<div class="chart-section">
+    <div class="chart-top">
+      <div class="chart-section-title">EVOLUÇÃO DE <span>CARGA</span></div>
+      <select class="ex-dropdown" id="exDropdown" onchange="changeChartEx(this.value)">
+        ${allEx.length === 0 ? '<option value="">Sem exercícios</option>' : allEx.map(ex=>`
+          <option value="${ex.id}" ${ex.id===selectedEx?'selected':''}>${ex.icon} ${esc(ex.name)}</option>
+        `).join('')}
+      </select>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="loadChart" class="chart-canvas"></canvas>
+      ${history.length === 0 ? `<div class="chart-empty" style="position:absolute;inset:0">
+        <span style="font-size:28px">📊</span>
+        <span>Nenhum registro de carga ainda</span>
+        <span style="font-size:11px">Use o botão abaixo para registrar</span>
+      </div>` : ''}
+    </div>
+    <button class="chart-log-btn" onclick="openLogModal()">＋ Registrar carga hoje</button>
+    ${history.length > 0 ? `<div class="log-history">
+      ${history.slice().reverse().map((h,i)=>`
+      <div class="log-row">
+        <span class="log-date">${h.date}</span>
+        <span class="log-val">${h.val} kg</span>
+        <button class="log-del" onclick="delLoad(${history.length-1-i})">✕</button>
+      </div>`).join('')}
+    </div>` : ''}
+  </div>`;
+
+  // ── Phases ──
+  html += `<div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.04em;margin-bottom:12px;">FASES DO <span style="color:var(--accent)">PROGRAMA</span></div>`;
   phases.forEach(p=>{
     const sid=`phase-section-${p.id}`;
     html+=`<div class="phase-card ${editMode?'editing':''}">
@@ -753,6 +962,156 @@ function renderProg() {
     </div>`;
   });
   return html;
+}
+
+function changeChartEx(exId) {
+  state.chartSelectedEx = exId;
+  saveState();
+  renderContent();
+  setTimeout(drawChart, 50);
+}
+
+function drawChart() {
+  const canvas = document.getElementById('loadChart');
+  if (!canvas) return;
+  const exId = state.chartSelectedEx;
+  const history = (state.loadHistory && exId) ? (state.loadHistory[exId] || []) : [];
+  if (history.length < 2) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#c8ff00';
+  const muted = '#6b6b82';
+  const padL=40, padR=16, padT=16, padB=36;
+  const cW=W-padL-padR, cH=H-padT-padB;
+
+  const vals = history.map(h=>h.val);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+
+  const pts = history.map((h,i)=>({
+    x: padL + (i/(history.length-1))*cW,
+    y: padT + cH - ((h.val-minV)/range)*cH,
+    val: h.val, date: h.date
+  }));
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let i=0; i<=4; i++) {
+    const y = padT + (i/4)*cH;
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(W-padR, y); ctx.stroke();
+    const label = Math.round(maxV - (i/4)*range);
+    ctx.fillStyle = muted; ctx.font = '10px DM Sans'; ctx.textAlign = 'right';
+    ctx.fillText(label+'kg', padL-6, y+4);
+  }
+
+  // X labels (show up to 5)
+  ctx.textAlign = 'center'; ctx.fillStyle = muted; ctx.font = '9px DM Sans';
+  const step = Math.max(1, Math.floor(history.length/5));
+  pts.forEach((p,i) => { if(i%step===0 || i===pts.length-1) ctx.fillText(p.date.slice(5), p.x, H-padB+14); });
+
+  // Area fill
+  const grad = ctx.createLinearGradient(0, padT, 0, padT+cH);
+  grad.addColorStop(0, accent+'44');
+  grad.addColorStop(1, accent+'00');
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, padT+cH);
+  pts.forEach(p => ctx.lineTo(p.x, p.y));
+  ctx.lineTo(pts[pts.length-1].x, padT+cH);
+  ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.strokeStyle = accent; ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  pts.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+  ctx.stroke();
+
+  // Dots
+  pts.forEach((p,i) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, i===pts.length-1?5:3.5, 0, Math.PI*2);
+    ctx.fillStyle = i===pts.length-1 ? accent : 'var(--bg)';
+    ctx.strokeStyle = accent; ctx.lineWidth = 2;
+    ctx.fill(); ctx.stroke();
+  });
+
+  // Last value label
+  const last = pts[pts.length-1];
+  ctx.fillStyle = accent; ctx.font = 'bold 12px DM Sans'; ctx.textAlign = 'center';
+  ctx.fillText(last.val+'kg', last.x, last.y-12);
+}
+
+// Log modal
+let logModalExId = null;
+function openLogModal() {
+  logModalExId = state.chartSelectedEx;
+  if (!logModalExId) return;
+  document.getElementById('logValInput').value = '';
+  document.getElementById('logDateInput').value = new Date().toISOString().slice(0,10);
+  document.getElementById('logModal').classList.add('open');
+}
+
+function confirmLog() {
+  const val = parseFloat(document.getElementById('logValInput').value);
+  const date = document.getElementById('logDateInput').value;
+  if (!val || !date || !logModalExId) return;
+  if (!state.loadHistory) state.loadHistory = {};
+  if (!state.loadHistory[logModalExId]) state.loadHistory[logModalExId] = [];
+  state.loadHistory[logModalExId].push({ date, val });
+  state.loadHistory[logModalExId].sort((a,b)=>a.date.localeCompare(b.date));
+  saveState();
+  closeModal('logModal');
+  renderContent();
+  setTimeout(drawChart, 80);
+}
+
+function delLoad(idx) {
+  const exId = state.chartSelectedEx;
+  if (!state.loadHistory?.[exId]) return;
+  // idx is from reversed display, so we need to map back
+  state.loadHistory[exId].splice(idx, 1);
+  saveState(); renderContent(); setTimeout(drawChart, 80);
+}
+
+// Jump PBs
+let jumpModalType = null;
+function openJumpModal(type) {
+  jumpModalType = type;
+  document.getElementById('jumpValInput').value = '';
+  document.getElementById('jumpDateInput').value = new Date().toISOString().slice(0,10);
+  document.getElementById('jumpModalTitle').textContent = type === 'approach' ? 'Salto com Passada' : 'Salto Parado';
+  document.getElementById('jumpModal').classList.add('open');
+}
+
+function confirmJump() {
+  const val = parseFloat(document.getElementById('jumpValInput').value);
+  const date = document.getElementById('jumpDateInput').value;
+  if (!val || !date || !jumpModalType) return;
+  if (!state.jumpPBs) state.jumpPBs = { approach:[], standing:[] };
+  state.jumpPBs[jumpModalType].push({ date, val });
+  state.jumpPBs[jumpModalType].sort((a,b)=>a.date.localeCompare(b.date));
+  saveState();
+  closeModal('jumpModal');
+  renderContent();
+  setTimeout(drawChart, 80);
+}
+
+function delJump(type, idx) {
+  if (!state.jumpPBs?.[type]) return;
+  state.jumpPBs[type].splice(idx, 1);
+  saveState(); renderContent(); setTimeout(drawChart, 80);
+}
+
+function toggleJumpHist(type) {
+  const el = document.getElementById(`hist-${type}`);
+  if (el) el.classList.toggle('open');
 }
 
 function updateLoad(pid,idx,val){const p=state.progression.phases.find(x=>x.id===pid);if(p&&p.loads[idx]){p.loads[idx].val=val;saveState();}}
