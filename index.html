@@ -1235,7 +1235,7 @@ function syncCursorToHSV() {
   const angle=currentHue*Math.PI/180;
   const dist=(currentSat/100)*r;
   cursor.style.left=(cx+Math.cos(angle)*dist)+'px';
-  cursor.style.top=(cy-Math.sin(angle)*dist)+'px';
+  cursor.style.top=(cy+Math.sin(angle)*dist)+'px';
   const hex=hsvToHex(currentHue,currentSat,currentBri);
   cursor.style.background=hex;
   updatePreview(hex);
@@ -1269,7 +1269,7 @@ function wheelEventToHSV(e, canvas) {
   const y=(touch.clientY-rect.top)*scaleY-110;
   const dist=Math.sqrt(x*x+y*y);
   if(dist>110) return false;
-  currentHue=((Math.atan2(-y,x)*180/Math.PI)+360)%360;
+  currentHue=((Math.atan2(y,x)*180/Math.PI)+360)%360;
   currentSat=Math.min(100,Math.round((dist/108)*100));
   return true;
 }
