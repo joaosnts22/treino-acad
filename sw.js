@@ -1,4 +1,4 @@
-const CACHE = 'liverj-v1.3';
+const CACHE = 'liverj-v1.4';
 const ASSETS = [
   './index.html',
   './manifest.json'
